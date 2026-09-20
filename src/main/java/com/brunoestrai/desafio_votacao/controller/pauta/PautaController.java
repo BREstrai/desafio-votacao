@@ -3,6 +3,7 @@ package com.brunoestrai.desafio_votacao.controller.pauta;
 import com.brunoestrai.desafio_votacao.domain.pauta.Pauta;
 import com.brunoestrai.desafio_votacao.domain.pauta.NovaPauta;
 import com.brunoestrai.desafio_votacao.service.PautaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class PautaController {
     private final PautaService pautaService;
 
     @PostMapping
-    public ResponseEntity<Pauta> create(@RequestBody NovaPauta novaPauta) {
+    public ResponseEntity<Pauta> create(@Valid @RequestBody NovaPauta novaPauta) {
 
         Pauta pauta = pautaService.criarPauta(novaPauta);
 

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,47 +15,39 @@ import java.util.Optional;
 @Transactional(propagation = Propagation.MANDATORY)
 public class PautaRepository {
 
-    private static final String SQL_INSERIR;
-    private static final String SQL_BUSCAR_POR_ID;
-    private static final String SQL_LISTAR_TODAS;
-
-    private final JdbcClient jdbcClient;
-
-    static {
-        SQL_INSERIR = """
-                INSERT INTO pauta
-                    (titulo, descricao)
-                VALUES
-                    (:titulo, :descricao)
-                RETURNING
-                    id, titulo, descricao, criada_em
-                """;
-
-        SQL_BUSCAR_POR_ID = """
+    private static final String SQL_INSERIR = """
+            INSERT INTO pauta
+                (titulo, descricao)
+            VALUES
+                (:titulo, :descricao)
+            RETURNING
+                id, titulo, descricao, criada_em
+            """;
+    private static final String SQL_BUSCAR_POR_ID = """
+            SELECT
+                id, titulo, descricao, criada_em
+            FROM
+                pauta
+            WHERE
+                id = :id
+            """;
+    private static final String SQL_LISTAR_TODAS = """
                 SELECT
                     id, titulo, descricao, criada_em
                 FROM
                     pauta
-                WHERE
-                    id = :id
-                """;
+                ORDER BY
+                    id
+            """;
 
-        SQL_LISTAR_TODAS = """
-                        SELECT
-                            id, titulo, descricao, criada_em
-                        FROM
-                            pauta
-                        ORDER BY
-                            id
-                """;
-    }
+    private final JdbcClient jdbcClient;
 
     private static final RowMapper<Pauta> MAPEADOR_PAUTA = (rs, numeroLinha) ->
             Pauta.builder()
                     .idPauta(rs.getLong("id"))
                     .titulo(rs.getString("titulo"))
                     .descricao(rs.getString("descricao"))
-                    .dhCriacao(rs.getObject("criada_em", OffsetDateTime.class))
+                    .dhCriacao(rs.getTimestamp("criada_em").toLocalDateTime())
                     .build();
 
     public PautaRepository(JdbcClient jdbcClient) {

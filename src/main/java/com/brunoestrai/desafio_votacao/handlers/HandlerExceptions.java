@@ -1,7 +1,11 @@
 package com.brunoestrai.desafio_votacao.handlers;
 
+import com.brunoestrai.desafio_votacao.exception.ConflitoException;
 import com.brunoestrai.desafio_votacao.exception.RecursoNaoEncontradoException;
+import com.brunoestrai.desafio_votacao.exception.ValidacaoException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,7 +17,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLException;
-import java.time.OffsetDateTime;
+import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -36,6 +41,35 @@ public class HandlerExceptions {
         log.warn("Recurso não encontrado em {}: {}", req.getRequestURI(), ex.getMessage());
 
         return responder(req, NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<RespostaHandler> handleCampoInvalido(
+            HttpServletRequest req, MethodArgumentNotValidException ex) {
+
+        String mensagem = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining("; "));
+
+        log.warn("Requisição inválida em {}: {}", req.getRequestURI(), mensagem);
+
+        return responder(req, BAD_REQUEST, mensagem);
+    }
+
+    @ExceptionHandler(ValidacaoException.class)
+    public ResponseEntity<RespostaHandler> handleValidacao(HttpServletRequest req, ValidacaoException ex) {
+
+        log.warn("Requisição inválida em {}: {}", req.getRequestURI(), ex.getMessage());
+
+        return responder(req, BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflitoException.class)
+    public ResponseEntity<RespostaHandler> handleConflito(HttpServletRequest req, ConflitoException ex) {
+
+        log.warn("Conflito em {}: {}", req.getRequestURI(), ex.getMessage());
+
+        return responder(req, CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(DuplicateKeyException.class)
@@ -98,7 +132,7 @@ public class HandlerExceptions {
 
     private ResponseEntity<RespostaHandler> responder(HttpServletRequest req, HttpStatus status, String mensagem) {
 
-        RespostaHandler respostaHandler = new RespostaHandler(req.getRequestURI(), OffsetDateTime.now(), status.value(),
+        RespostaHandler respostaHandler = new RespostaHandler(req.getRequestURI(), LocalDateTime.now(), status.value(),
                 status.getReasonPhrase(), mensagem);
 
         return ResponseEntity.status(status).body(respostaHandler);

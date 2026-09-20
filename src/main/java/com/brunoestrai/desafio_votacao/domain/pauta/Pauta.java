@@ -2,7 +2,7 @@ package com.brunoestrai.desafio_votacao.domain.pauta;
 
 import lombok.*;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,5 +17,5 @@ public class Pauta {
 
     private String descricao;
 
-    private OffsetDateTime dhCriacao;
+    private LocalDateTime dhCriacao;
 }
