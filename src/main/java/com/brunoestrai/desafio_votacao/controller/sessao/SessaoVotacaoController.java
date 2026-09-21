@@ -3,7 +3,7 @@ package com.brunoestrai.desafio_votacao.controller.sessao;
 import com.brunoestrai.desafio_votacao.domain.sessao.AberturaSessao;
 import com.brunoestrai.desafio_votacao.domain.sessao.SessaoAberta;
 import com.brunoestrai.desafio_votacao.domain.sessao.SessaoVotacao;
-import com.brunoestrai.desafio_votacao.service.SessaoVotacaoService;
+import com.brunoestrai.desafio_votacao.service.SessaoVotacaoCacheService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,12 +16,12 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping("/sessao")
 public class SessaoVotacaoController {
 
-    private final SessaoVotacaoService sessaoVotacaoService;
+    private final SessaoVotacaoCacheService sessaoVotacaoCacheService;
 
     @PostMapping
     public ResponseEntity<SessaoVotacao> abrir(@Valid @RequestBody AberturaSessao aberturaSessao) {
 
-        SessaoVotacao sessaoVotacao = sessaoVotacaoService.abrirSessao(aberturaSessao);
+        SessaoVotacao sessaoVotacao = sessaoVotacaoCacheService.abrirSessao(aberturaSessao);
 
         return ResponseEntity.status(CREATED).body(sessaoVotacao);
     }
@@ -29,6 +29,6 @@ public class SessaoVotacaoController {
     @GetMapping
     public ResponseEntity<SessaoAberta> findAberta() {
 
-        return ResponseEntity.ok(sessaoVotacaoService.buscarSessaoAberta());
+        return ResponseEntity.ok(sessaoVotacaoCacheService.buscarSessaoAberta());
     }
 }
