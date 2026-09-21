@@ -1,11 +1,10 @@
 package com.brunoestrai.desafio_votacao.handlers;
 
 import com.brunoestrai.desafio_votacao.exception.ConflitoException;
+import com.brunoestrai.desafio_votacao.exception.OperacaoNaoPermitidaException;
 import com.brunoestrai.desafio_votacao.exception.RecursoNaoEncontradoException;
 import com.brunoestrai.desafio_votacao.exception.ValidacaoException;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,12 +12,15 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.TransientDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLException;
-import java.util.stream.Collectors;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -32,6 +34,7 @@ public class HandlerExceptions {
     private static final String MSG_REGISTRO_DUPLICADO = "O registro informado já existe";
     private static final String MSG_REFERENCIA_INEXISTENTE = "O registro relacionado informado não existe";
     private static final String MSG_VIOLACAO_INTEGRIDADE = "Os dados informados são inválidos";
+    private static final String MSG_CORPO_INVALIDO = "O corpo da requisição é inválido, confira os campos e os tipos enviados";
     private static final String MSG_TEMPORARIA = "Serviço temporariamente indisponível, tente novamente em instantes";
 
     @ExceptionHandler(RecursoNaoEncontradoException.class)
@@ -56,12 +59,30 @@ public class HandlerExceptions {
         return responder(req, BAD_REQUEST, mensagem);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<RespostaHandler> handleCorpoInvalido(
+            HttpServletRequest req, HttpMessageNotReadableException ex) {
+
+        log.warn("Corpo da requisição inválido em {}: {}", req.getRequestURI(), ex.getMostSpecificCause().getMessage());
+
+        return responder(req, BAD_REQUEST, MSG_CORPO_INVALIDO);
+    }
+
     @ExceptionHandler(ValidacaoException.class)
     public ResponseEntity<RespostaHandler> handleValidacao(HttpServletRequest req, ValidacaoException ex) {
 
         log.warn("Requisição inválida em {}: {}", req.getRequestURI(), ex.getMessage());
 
         return responder(req, BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(OperacaoNaoPermitidaException.class)
+    public ResponseEntity<RespostaHandler> handleOperacaoNaoPermitida(
+            HttpServletRequest req, OperacaoNaoPermitidaException ex) {
+
+        log.warn("Operação não permitida em {}: {}", req.getRequestURI(), ex.getMessage());
+
+        return responder(req, FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(ConflitoException.class)

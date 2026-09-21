@@ -1,0 +1,94 @@
+{
+  "info": {
+    "name": "desafio-votacao",
+    "description": "Requisições da API de votação. Ajuste os ids e o CPF conforme os dados criados na sua execução.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1" }
+  ],
+  "item": [
+    {
+      "name": "Pauta",
+      "item": [
+        {
+          "name": "Criar pauta",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dsTitulo\": \"Aquisição de novo terreno para expansão\",\n  \"dsPauta\": \"Votação sobre a compra do terreno ao lado da sede\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/pauta"
+          }
+        },
+        {
+          "name": "Listar pautas",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pauta"
+          }
+        },
+        {
+          "name": "Buscar pauta por id",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pauta/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sessão de votação",
+      "item": [
+        {
+          "name": "Abrir sessão",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPauta\": 1,\n  \"tempoLimite\": 5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/sessao"
+          }
+        },
+        {
+          "name": "Buscar sessão aberta",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/sessao"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Voto",
+      "item": [
+        {
+          "name": "Registrar voto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPauta\": 1,\n  \"cpf\": \"529.982.247-25\",\n  \"aprovado\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/voto"
+          }
+        },
+        {
+          "name": "Apurar votação",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pauta/1/resultado"
+          }
+        }
+      ]
+    }
+  ]
+}

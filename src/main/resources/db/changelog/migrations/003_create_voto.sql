@@ -6,7 +6,7 @@ CREATE TABLE voto
     id            BIGINT GENERATED ALWAYS AS IDENTITY,
     pauta_id      BIGINT      NOT NULL,
     cpf           CHAR(11)    NOT NULL,
-    voto          VARCHAR(3)  NOT NULL,
+    voto          smallint    NOT NULL,
     registrado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -23,4 +23,4 @@ ALTER TABLE voto
     ADD CONSTRAINT ck_voto_cpf CHECK (cpf ~ '^[0-9]{11}$');
 
 ALTER TABLE voto
-    ADD CONSTRAINT ck_voto_valor CHECK (voto IN ('SIM', 'NAO'));
+    ADD CONSTRAINT ck_voto_valor CHECK (voto IN (0, 1));
